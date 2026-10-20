@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta name="referrer" content="no-referrer">
+<title>Now You See Me: private consent form</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f1f3f8;--card:#fff;--ink:#14213d;--mute:#5a6480;--line:#cfd5e4;--accent:#b3263e;--on:#fff;--spot:#e9b44c;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#101626;--card:#19213a;--ink:#eef1fa;--mute:#a3acc6;--line:#2c3556;--accent:#e0566d;--on:#101626}}
+:root[data-theme="dark"]{--bg:#101626;--card:#19213a;--ink:#eef1fa;--mute:#a3acc6;--line:#2c3556;--accent:#e0566d;--on:#101626}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.5 "Bricolage Grotesque",system-ui,sans-serif}
+main{max-width:640px;margin:0 auto;padding:24px 18px 48px}
+h1{font-size:clamp(34px,9vw,52px);line-height:1.02;font-weight:800;margin:8px 0 12px;letter-spacing:-.02em}
+.lede{color:var(--mute);margin:0 0 28px}
+.bar{height:6px;background:linear-gradient(90deg,var(--accent) 0 70%,var(--spot) 70%);border-radius:3px}
+fieldset{border:0;padding:0;margin:0 0 28px}
+legend,label.q{display:block;font-weight:600;margin-bottom:4px;padding:0}
+.hint{color:var(--mute);font-size:15px;margin:0 0 10px}
+input[type=text],textarea,select{width:100%;font:inherit;color:var(--ink);background:var(--card);border:1.5px solid var(--line);border-radius:10px;padding:12px}
+textarea{min-height:90px;resize:vertical}
+input:focus,textarea:focus,select:focus,button:focus-visible{outline:3px solid var(--spot);outline-offset:1px}
+.opt{display:flex;gap:12px;align-items:center;padding:11px 12px;margin-bottom:8px;background:var(--card);border:1.5px solid var(--line);border-radius:10px;cursor:pointer}
+.opt input{width:22px;height:22px;accent-color:var(--accent);flex:none;margin:0}
+.opt:has(input:checked){border-color:var(--accent)}
+button{font:inherit;font-weight:600;border:0;border-radius:12px;padding:15px 20px;background:var(--accent);color:var(--on);width:100%;cursor:pointer}
+button.alt{background:transparent;color:var(--ink);border:1.5px solid var(--line);margin-top:10px}
+#msg{margin-top:16px;padding:14px;border-radius:10px;background:var(--card);border-left:5px solid var(--spot)}
+#msg.err{border-left-color:var(--accent)}
+.private{background:var(--card);border-left:5px solid var(--spot);border-radius:10px;padding:14px;margin:0 0 28px}.private p{margin:0 0 8px}.private p:last-child{margin:0}
+</style>
+</head>
+<body>
+<main>
+<div class="bar"></div>
+<h1>Now You See Me: how we describe our company</h1>
+<p class="lede">Some grants and show materials ask about the diversity of our company. This form asks whether, and how, you're happy to be included.</p>
+<div class="private">
+<p><strong>This is private and every question is optional.</strong> Only Lori sees your answers. They go straight from your email app to Lori. Nothing is saved on this page or anywhere else.</p>
+<p>Saying no is completely fine and won't change anything about your place in the show.</p>
+<p>You can change or withdraw your answers anytime by messaging Lori.</p>
+</div>
+
+<fieldset><label class="q" for="name">Your name</label><input type="text" id="name" autocomplete="name"></fieldset>
+
+<fieldset><legend>Can we count you in a company-level line with no name attached?</legend><p class="hint">For example: "Our company includes LGBTQIA+, neurodiverse and First Nations artists".</p>
+<label class="opt"><input type="radio" name="count" value="Yes">Yes</label>
+<label class="opt"><input type="radio" name="count" value="No">No</label></fieldset>
+
+<fieldset><legend>If yes, which words describe you?</legend><p class="hint">Tick any that fit, or none.</p><div id="words"></div>
+<label class="q" for="own">In my own words</label><input type="text" id="own"></fieldset>
+
+<fieldset><legend>Where can we use it?</legend><p class="hint">Tick any that you're okay with.</p><div id="where"></div></fieldset>
+
+<fieldset><legend>Named or anonymous?</legend>
+<label class="opt"><input type="radio" name="named" value="Keep me anonymous">Keep me anonymous</label>
+<label class="opt"><input type="radio" name="named" value="You can name me as part of the company">You can name me as part of the company</label></fieldset>
+
+<fieldset><label class="q" for="more">Anything you'd like us to know or avoid?</label><textarea id="more"></textarea></fieldset>
+
+<button id="send">Send my answers to Lori</button>
+<button class="alt" id="copy">Copy my answers</button>
+<div id="msg" hidden role="status"></div>
+</main>
+<script>
+var TO="anpanart@gmail.com";
+var WORDS=["LGBTQIA+ / trans / queer","Neurodiverse","Aboriginal and/or Torres Strait Islander","Multicultural or culturally diverse","Disabled, d/Deaf or chronically ill"];
+var WHERE=["City of Melbourne grant application only","Other grants","Show marketing, program and website"];
+function opts(box,name,list){list.forEach(function(t){var l=document.createElement("label");l.className="opt";var i=document.createElement("input");i.type="checkbox";i.name=name;i.value=t;l.appendChild(i);l.appendChild(document.createTextNode(t));box.appendChild(l);});}
+opts(document.getElementById("words"),"words",WORDS);opts(document.getElementById("where"),"where",WHERE);
+function v(id){return document.getElementById(id).value.trim()||"(not answered)";}
+function checked(n){return Array.prototype.map.call(document.querySelectorAll("input[name="+n+"]:checked"),function(x){return x.value;});}
+function list(n){var a=checked(n);return a.length?a.join(", "):"(not answered)";}
+function radio(n){var a=checked(n);return a.length?a[0]:"(not answered)";}
+function msg(t,err){var m=document.getElementById("msg");m.hidden=false;m.className=err?"err":"";m.textContent=t;}
+function build(){
+var nm=document.getElementById("name").value.trim();
+return {subject:"Now You See Me consent form"+(nm?": "+nm:""),body:["Now You See Me: private consent form","Name: "+(nm||"(not answered)"),"Count me in a company-level line (no name attached): "+radio("count"),"Words that describe me: "+list("words"),"In my own words: "+v("own"),"Where you can use it: "+list("where"),"Named or anonymous: "+radio("named"),"Anything to know or avoid: "+v("more"),"I know I can change these answers anytime by messaging Lori."].join("\r\n\r\n")};
+}
+document.getElementById("send").onclick=function(){
+var d=build();
+window.location.href="mailto:"+TO+"?subject="+encodeURIComponent(d.subject)+"&body="+encodeURIComponent(d.body);
+msg("Your email app should open with your answers filled in. Press send there to finish. If nothing opened, use Copy my answers and email them to "+TO+".");
+};
+document.getElementById("copy").onclick=function(){
+var d=build(),t=d.body;
+try{navigator.clipboard.writeText(t).then(function(){msg("Copied. Paste your answers into an email or message to Lori ("+TO+").");},function(){fallback(t);});}
+catch(e){fallback(t);}
+};
+function fallback(t){var a=document.createElement("textarea");a.value=t;document.body.appendChild(a);a.select();var ok=false;try{ok=document.execCommand("copy");}catch(e){}document.body.removeChild(a);msg(ok?"Copied. Paste your answers into an email or message to Lori ("+TO+").":"Copying was blocked. Use Send my answers instead.",!ok);}
+</script>
+</body>
+</html>
