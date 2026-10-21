@@ -40,7 +40,7 @@ button.alt{background:transparent;color:var(--ink);border:1.5px solid var(--line
 <h1>Now You See Me: how we describe our company</h1>
 <p class="lede">Some grants and show materials ask about the diversity of our company. This form asks whether, and how, you're happy to be included.</p>
 <div class="private">
-<p><strong>This is private and every question is optional.</strong> Only Lori sees your answers. They go straight from your email app to Lori. Nothing is saved on this page or anywhere else.</p>
+<p><strong>This is private and every question is optional.</strong> Only Lori sees your answers. When you press Send, your answers are emailed to Lori through FormSubmit, a form delivery service. This page doesn't save anything, but FormSubmit handles your answers in transit and keeps a copy for up to 30 days. If you'd rather avoid that, use Copy my answers and email Lori yourself.</p>
 <p>Saying no is completely fine and won't change anything about your place in the show.</p>
 <p>You can change or withdraw your answers anytime by messaging Lori.</p>
 </div>
@@ -62,6 +62,7 @@ button.alt{background:transparent;color:var(--ink);border:1.5px solid var(--line
 
 <fieldset><label class="q" for="more">Anything you'd like us to know or avoid?</label><textarea id="more"></textarea></fieldset>
 
+<input type="text" id="honey" name="_honey" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0">
 <button id="send">Send my answers to Lori</button>
 <button class="alt" id="copy">Copy my answers</button>
 <div id="msg" hidden role="status"></div>
@@ -81,17 +82,26 @@ function build(){
 var nm=document.getElementById("name").value.trim();
 return {subject:"Now You See Me consent form"+(nm?": "+nm:""),body:["Now You See Me: private consent form","Name: "+(nm||"(not answered)"),"Count me in a company-level line (no name attached): "+radio("count"),"Words that describe me: "+list("words"),"In my own words: "+v("own"),"Where you can use it: "+list("where"),"Named or anonymous: "+radio("named"),"Anything to know or avoid: "+v("more"),"I know I can change these answers anytime by messaging Lori."].join("\r\n\r\n")};
 }
+var ENDPOINT="https://formsubmit.co/ajax/"+TO;
+function mailtoLink(d){return "mailto:"+TO+"?subject="+encodeURIComponent(d.subject)+"&body="+encodeURIComponent(d.body);}
 document.getElementById("send").onclick=function(){
-var d=build();
-window.location.href="mailto:"+TO+"?subject="+encodeURIComponent(d.subject)+"&body="+encodeURIComponent(d.body);
-msg("Your email app should open with your answers filled in. Press send there to finish. If nothing opened, use Copy my answers and email them to "+TO+".");
+var b=this,d=build();
+if(document.getElementById("honey").value){msg("Thanks! Your answers were sent privately to Lori.");return;}
+b.disabled=true;b.textContent="Sending…";
+var nm=document.getElementById("name").value.trim();
+var data={_subject:"Now You See Me consent form",_template:"table",_captcha:"false",_honey:"",
+"Name":nm||"(not answered)","Count me in a company-level line (no name attached)":radio("count"),"Words that describe me":list("words"),"In my own words":v("own"),"Where you can use it":list("where"),"Named or anonymous":radio("named"),"Anything to know or avoid":v("more"),"Note":"I know I can change these answers anytime by messaging Lori."};
+fetch(ENDPOINT,{method:"POST",headers:{"Content-Type":"application/json","Accept":"application/json"},body:JSON.stringify(data)})
+.then(function(r){return r.json().catch(function(){return {};}).then(function(j){if(!r.ok||String(j.success)==="false")throw new Error(j.message||"send failed");});})
+.then(function(){b.textContent="Sent";msg("Thanks! Your answers were sent privately to Lori.");})
+.catch(function(){b.disabled=false;b.textContent="Send my answers to Lori";var m=document.getElementById("msg");msg("Sorry, your answers couldn't be sent. Please use Copy my answers and email them to "+TO+" (or try your email app).",true);var a=document.createElement("a");a.href=mailtoLink(d);a.textContent=" Open my email app";m.appendChild(a);});
 };
 document.getElementById("copy").onclick=function(){
 var d=build(),t=d.body;
 try{navigator.clipboard.writeText(t).then(function(){msg("Copied. Paste your answers into an email or message to Lori ("+TO+").");},function(){fallback(t);});}
 catch(e){fallback(t);}
 };
-function fallback(t){var a=document.createElement("textarea");a.value=t;document.body.appendChild(a);a.select();var ok=false;try{ok=document.execCommand("copy");}catch(e){}document.body.removeChild(a);msg(ok?"Copied. Paste your answers into an email or message to Lori ("+TO+").":"Copying was blocked. Use Send my answers instead.",!ok);}
+function fallback(t){var a=document.createElement("textarea");a.value=t;document.body.appendChild(a);a.select();var ok=false;try{ok=document.execCommand("copy");}catch(e){}document.body.removeChild(a);msg(ok?"Copied. Paste your answers into an email or message to Lori ("+TO+").":"Copying was blocked. Please try Send my answers, or email "+TO+".",!ok);}
 </script>
 </body>
 </html>
