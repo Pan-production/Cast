@@ -16,12 +16,12 @@ main{max-width:640px;margin:0 auto;padding:24px 18px 48px}
 h1{font-size:clamp(34px,9vw,52px);line-height:1.02;font-weight:800;margin:8px 0 12px;letter-spacing:-.02em}
 .lede{color:var(--mute);margin:0 0 28px}
 .bar{height:6px;background:linear-gradient(90deg,var(--accent) 0 70%,var(--spot) 70%);border-radius:3px}
-fieldset{border:0;padding:0;margin:0 0 28px}
+fieldset,.field{border:0;padding:0;margin:0 0 28px}
 legend,label.q{display:block;font-weight:600;margin-bottom:4px;padding:0}
 .hint{color:var(--mute);font-size:15px;margin:0 0 10px}
 input[type=text],textarea,select{width:100%;font:inherit;color:var(--ink);background:var(--card);border:1.5px solid var(--line);border-radius:10px;padding:12px}
 textarea{min-height:90px;resize:vertical}
-input:focus,textarea:focus,select:focus,button:focus-visible{outline:3px solid var(--spot);outline-offset:1px}
+input:focus,textarea:focus,select:focus,button:focus,button:focus-visible{outline:3px solid var(--spot);outline-offset:1px}
 .opt{display:flex;gap:12px;align-items:center;padding:11px 12px;margin-bottom:8px;background:var(--card);border:1.5px solid var(--line);border-radius:10px;cursor:pointer}
 .opt input{width:22px;height:22px;accent-color:var(--accent);flex:none;margin:0}
 .opt:has(input:checked){border-color:var(--accent)}
@@ -37,22 +37,22 @@ button.alt{background:transparent;color:var(--ink);border:1.5px solid var(--line
 <h1>Join our sketch show</h1>
 <p class="lede">We're making a sketch comedy show for next year's comedy festival and need people for the stage and behind it. Tell us how you'd like to help. It takes about 3 minutes, and beginners are welcome.</p>
 
-<fieldset><label class="q" for="name">Your name</label><input type="text" id="name" autocomplete="name"></fieldset>
+<div class="field"><label class="q" for="name">Your name</label><input type="text" id="name" autocomplete="name"></div>
 
-<fieldset><legend>Which roles interest you?</legend><p class="hint">Tick as many as you like.</p><div id="roles"></div></fieldset>
-<fieldset><label class="q" for="first">Which one is your first choice?</label><select id="first"><option value="">Choose a role</option></select></fieldset>
+<fieldset aria-describedby="roles-hint"><legend>Which roles interest you?</legend><p class="hint" id="roles-hint">Tick as many as you like.</p><div id="roles"></div></fieldset>
+<div class="field"><label class="q" for="first">Which one is your first choice?</label><select id="first"><option value="">Choose a role</option></select></div>
 
-<fieldset><label class="q" for="exp">Relevant experience</label><p class="hint">Comedy, theatre, production, anything. No experience is fine too.</p><textarea id="exp"></textarea></fieldset>
-<fieldset><label class="q" for="perf">If you'd like to perform: what have you done, and what characters or styles suit you?</label><p class="hint">Sketch, improv, stand-up, acting, impressions.</p><textarea id="perf"></textarea></fieldset>
+<div class="field"><label class="q" for="exp">Relevant experience</label><p class="hint" id="exp-hint">Comedy, theatre, production, anything. No experience is fine too.</p><textarea id="exp" aria-describedby="exp-hint"></textarea></div>
+<div class="field"><label class="q" for="perf">If you'd like to perform: what have you done, and what characters or styles suit you?</label><p class="hint" id="perf-hint">Sketch, improv, stand-up, acting, impressions.</p><textarea id="perf" aria-describedby="perf-hint"></textarea></div>
 
 <fieldset><legend>When can you do rehearsals?</legend><div id="avail"></div></fieldset>
-<fieldset><label class="q" for="block">Dates you can't do between now and the festival</label><textarea id="block"></textarea></fieldset>
-<fieldset><label class="q" for="hrs">Hours a week you can realistically give</label><select id="hrs"><option value="">Choose one</option><option>1-2 hours</option><option>3-5 hours</option><option>6 or more hours</option></select></fieldset>
-<fieldset><label class="q" for="pay">Is unpaid work okay for you?</label><select id="pay"><option value="">Choose one</option><option>Yes, unpaid is fine</option><option>I'd prefer paid</option><option>Either, let's talk</option></select></fieldset>
-<fieldset><label class="q" for="more">Anything else we should know?</label><p class="hint">Skills, equipment, contacts, access needs.</p><textarea id="more"></textarea></fieldset>
+<div class="field"><label class="q" for="block">Dates you can't do between now and the festival</label><textarea id="block"></textarea></div>
+<div class="field"><label class="q" for="hrs">Hours a week you can realistically give</label><select id="hrs"><option value="">Choose one</option><option>1-2 hours</option><option>3-5 hours</option><option>6 or more hours</option></select></div>
+<div class="field"><label class="q" for="pay">Is unpaid work okay for you?</label><select id="pay"><option value="">Choose one</option><option>Yes, unpaid is fine</option><option>I'd prefer paid</option><option>Either, let's talk</option></select></div>
+<div class="field"><label class="q" for="more">Anything else we should know?</label><p class="hint" id="more-hint">Skills, equipment, contacts, access needs.</p><textarea id="more" aria-describedby="more-hint"></textarea></div>
 
-<button id="send">Send my answers</button>
-<button class="alt" id="copy">Copy my answers</button>
+<button id="send" type="button">Send my answers</button>
+<button class="alt" id="copy" type="button">Copy my answers</button>
 <div id="msg" hidden role="status"></div>
 </main>
 <script>
@@ -65,11 +65,33 @@ opts(rolesBox,"role",ROLES);opts(document.getElementById("avail"),"avail",AVAIL)
 ROLES.forEach(function(t){var o=document.createElement("option");o.textContent=t;first.appendChild(o);});
 function v(id){return document.getElementById(id).value.trim()||"(not answered)";}
 function checked(n){return Array.prototype.map.call(document.querySelectorAll("input[name="+n+"]:checked"),function(x){return x.value;});}
-function msg(t,err){var m=document.getElementById("msg");m.hidden=false;m.className=err?"err":"";m.textContent=t;}
+function msg(t,err){var m=document.getElementById("msg");m.hidden=false;m.className=err?"err":"";m.setAttribute("role",err?"alert":"status");m.textContent=t;}
+function clearInvalid(){
+document.getElementById("name").removeAttribute("aria-invalid");
+document.querySelectorAll("input[name=role]").forEach(function(x){x.removeAttribute("aria-invalid");});
+}
+document.getElementById("name").addEventListener("input",function(){
+if(this.value.trim())this.removeAttribute("aria-invalid");
+});
+rolesBox.addEventListener("change",function(){
+if(checked("role").length)document.querySelectorAll("input[name=role]").forEach(function(x){x.removeAttribute("aria-invalid");});
+});
 function build(){
-var nm=document.getElementById("name").value.trim(),r=checked("role");
-if(!nm){msg("Add your name.",true);return null;}
-if(!r.length){msg("Pick at least one role you're interested in.",true);return null;}
+clearInvalid();
+var nmEl=document.getElementById("name"),nm=nmEl.value.trim(),r=checked("role");
+if(!nm){
+msg("Add your name.",true);
+nmEl.setAttribute("aria-invalid","true");
+nmEl.focus();
+return null;
+}
+if(!r.length){
+msg("Pick at least one role you're interested in.",true);
+var rInputs=document.querySelectorAll("input[name=role]");
+rInputs.forEach(function(x){x.setAttribute("aria-invalid","true");});
+if(rInputs[0])rInputs[0].focus();
+return null;
+}
 var a=checked("avail");
 return {subject:"Sketch show: "+nm+" wants to help",body:["Name: "+nm,"Roles: "+r.join(", "),"First choice: "+(first.value||"(not answered)"),"Experience: "+v("exp"),"Performing background: "+v("perf"),"Rehearsal times: "+(a.length?a.join(", "):"(not answered)"),"Dates I can't do: "+v("block"),"Hours per week: "+v("hrs"),"Unpaid okay: "+v("pay"),"Anything else: "+v("more")].join("\n\n")};
 }
@@ -78,10 +100,21 @@ var d=build();if(!d)return;
 window.location.href="mailto:"+TO+"?subject="+encodeURIComponent(d.subject)+"&body="+encodeURIComponent(d.body);
 msg("Your email app should open with your answers filled in. Press send there to finish. If nothing opened, use Copy my answers and email them to "+TO+".");
 };
+function fallback(t){
+var a=document.createElement("textarea");a.value=t;document.body.appendChild(a);a.select();var ok=false;
+try{ok=document.execCommand("copy");}catch(e){}document.body.removeChild(a);
+msg(ok?"Copied. Paste your answers into an email to "+TO+".":"Copying was blocked. Use Send my answers instead.",!ok);
+}
 document.getElementById("copy").onclick=function(){
 var d=build();if(!d)return;
-try{navigator.clipboard.writeText(d.body).then(function(){msg("Copied. Paste your answers into an email to "+TO+".");},function(){msg("Copying was blocked. Use Send my answers instead.",true);});}
-catch(e){msg("Copying was blocked. Use Send my answers instead.",true);}
+var t=d.body;
+try{
+if(navigator.clipboard&&navigator.clipboard.writeText){
+navigator.clipboard.writeText(t).then(function(){msg("Copied. Paste your answers into an email to "+TO+".");},function(){fallback(t);});
+}else{
+fallback(t);
+}
+}catch(e){fallback(t);}
 };
 </script>
 </body>
