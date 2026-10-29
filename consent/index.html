@@ -23,7 +23,7 @@ legend,label.q{display:block;font-weight:600;margin-bottom:4px;padding:0}
 .hint{color:var(--mute);font-size:15px;margin:0 0 10px}
 input[type=text],textarea,select{width:100%;font:inherit;color:var(--ink);background:var(--card);border:1.5px solid var(--line);border-radius:10px;padding:12px}
 textarea{min-height:90px;resize:vertical}
-input:focus,textarea:focus,select:focus,button:focus-visible{outline:3px solid var(--spot);outline-offset:1px}
+input:focus,textarea:focus,select:focus,button:focus,button:focus-visible{outline:3px solid var(--spot);outline-offset:1px}
 .opt{display:flex;gap:12px;align-items:center;padding:11px 12px;margin-bottom:8px;background:var(--card);border:1.5px solid var(--line);border-radius:10px;cursor:pointer}
 .opt input{width:22px;height:22px;accent-color:var(--accent);flex:none;margin:0}
 .opt:has(input:checked){border-color:var(--accent)}
@@ -47,14 +47,14 @@ button.alt{background:transparent;color:var(--ink);border:1.5px solid var(--line
 
 <fieldset><label class="q" for="name">Your name</label><input type="text" id="name" autocomplete="name"></fieldset>
 
-<fieldset><legend>Can we count you in a company-level line with no name attached?</legend><p class="hint">For example: "Our company includes LGBTQIA+, neurodiverse and First Nations artists".</p>
+<fieldset aria-describedby="count-hint"><legend>Can we count you in a company-level line with no name attached?</legend><p class="hint" id="count-hint">For example: "Our company includes LGBTQIA+, neurodiverse and First Nations artists".</p>
 <label class="opt"><input type="radio" name="count" value="Yes">Yes</label>
 <label class="opt"><input type="radio" name="count" value="No">No</label></fieldset>
 
-<fieldset><legend>If yes, which words describe you?</legend><p class="hint">Tick any that fit, or none.</p><div id="words"></div>
+<fieldset aria-describedby="words-hint"><legend>If yes, which words describe you?</legend><p class="hint" id="words-hint">Tick any that fit, or none.</p><div id="words"></div>
 <label class="q" for="own">In my own words</label><input type="text" id="own"></fieldset>
 
-<fieldset><legend>Where can we use it?</legend><p class="hint">Tick any that you're okay with.</p><div id="where"></div></fieldset>
+<fieldset aria-describedby="where-hint"><legend>Where can we use it?</legend><p class="hint" id="where-hint">Tick any that you're okay with.</p><div id="where"></div></fieldset>
 
 <fieldset><legend>Named or anonymous?</legend>
 <label class="opt"><input type="radio" name="named" value="Keep me anonymous">Keep me anonymous</label>
@@ -65,7 +65,7 @@ button.alt{background:transparent;color:var(--ink);border:1.5px solid var(--line
 <input type="text" id="honey" name="_honey" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0">
 <button id="send">Send my answers to Lori</button>
 <button class="alt" id="copy">Copy my answers</button>
-<div id="msg" hidden role="status"></div>
+<div id="msg" hidden role="status" aria-live="polite"></div>
 </main>
 <script>
 var TO="anpanart@gmail.com";
@@ -77,7 +77,37 @@ function v(id){return document.getElementById(id).value.trim()||"(not answered)"
 function checked(n){return Array.prototype.map.call(document.querySelectorAll("input[name="+n+"]:checked"),function(x){return x.value;});}
 function list(n){var a=checked(n);return a.length?a.join(", "):"(not answered)";}
 function radio(n){var a=checked(n);return a.length?a[0]:"(not answered)";}
-function msg(t,err){var m=document.getElementById("msg");m.hidden=false;m.className=err?"err":"";m.textContent=t;}
+function msg(t,err){var m=document.getElementById("msg");m.hidden=false;m.className=err?"err":"";m.setAttribute("role",err?"alert":"status");m.textContent=t;}
+function clearInvalid(){
+document.querySelectorAll("[aria-invalid]").forEach(function(x){
+x.removeAttribute("aria-invalid");
+if(x.getAttribute("aria-describedby")==="msg")x.removeAttribute("aria-describedby");
+});
+}
+function validateRequired(){
+clearInvalid();
+var reqs=document.querySelectorAll("input[required],textarea[required],select[required],[aria-required='true']");
+for(var i=0;i<reqs.length;i++){
+var el=reqs[i],missing=false;
+if(el.type==="radio"||el.type==="checkbox"){
+if(el.name&&!document.querySelector("input[name='"+el.name+"']:checked"))missing=true;
+}else if(!el.value.trim()){
+missing=true;
+}
+if(missing){
+msg("Please complete the required field.",true);
+el.setAttribute("aria-invalid","true");
+el.setAttribute("aria-describedby","msg");
+el.focus();
+return false;
+}
+}
+return true;
+}
+document.querySelectorAll("input,textarea,select").forEach(function(el){
+el.addEventListener("input",function(){if(this.getAttribute("aria-invalid")){this.removeAttribute("aria-invalid");if(this.getAttribute("aria-describedby")==="msg")this.removeAttribute("aria-describedby");}});
+el.addEventListener("change",function(){if(this.getAttribute("aria-invalid")){this.removeAttribute("aria-invalid");if(this.getAttribute("aria-describedby")==="msg")this.removeAttribute("aria-describedby");}});
+});
 function build(){
 var nm=document.getElementById("name").value.trim();
 return {subject:"Now You See Me consent form"+(nm?": "+nm:""),body:["Now You See Me: private consent form","Name: "+(nm||"(not answered)"),"Count me in a company-level line (no name attached): "+radio("count"),"Words that describe me: "+list("words"),"In my own words: "+v("own"),"Where you can use it: "+list("where"),"Named or anonymous: "+radio("named"),"Anything to know or avoid: "+v("more"),"I know I can change these answers anytime by messaging Lori."].join("\r\n\r\n")};
@@ -85,6 +115,7 @@ return {subject:"Now You See Me consent form"+(nm?": "+nm:""),body:["Now You See
 var ENDPOINT="https://formsubmit.co/ajax/"+TO;
 function mailtoLink(d){return "mailto:"+TO+"?subject="+encodeURIComponent(d.subject)+"&body="+encodeURIComponent(d.body);}
 document.getElementById("send").onclick=function(){
+if(!validateRequired())return;
 var b=this,d=build();
 if(document.getElementById("honey").value){msg("Thanks! Your answers were sent privately to Lori.");return;}
 b.disabled=true;b.textContent="Sending…";
@@ -97,6 +128,7 @@ fetch(ENDPOINT,{method:"POST",headers:{"Content-Type":"application/json","Accept
 .catch(function(){b.disabled=false;b.textContent="Send my answers to Lori";var m=document.getElementById("msg");msg("Sorry, your answers couldn't be sent. Please use Copy my answers and email them to "+TO+" (or try your email app).",true);var a=document.createElement("a");a.href=mailtoLink(d);a.textContent=" Open my email app";m.appendChild(a);});
 };
 document.getElementById("copy").onclick=function(){
+if(!validateRequired())return;
 var d=build(),t=d.body;
 try{navigator.clipboard.writeText(t).then(function(){msg("Copied. Paste your answers into an email or message to Lori ("+TO+").");},function(){fallback(t);});}
 catch(e){fallback(t);}
