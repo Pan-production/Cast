@@ -41,7 +41,7 @@ button.alt{background:transparent;color:var(--ink);border:1.5px solid var(--line
 <h1>MICF 2027: emergency contacts</h1>
 <p class="lede">Every cast and crew member across both PanProduction shows, please fill this in so we can look after you if something goes wrong.</p>
 <div class="private">
-<p><strong>This is private.</strong> Only Lori sees your answers. When you press Send, your answers are emailed to Lori through FormSubmit, a form delivery service. This page doesn't save anything, but FormSubmit handles your answers in transit and keeps a copy for up to 30 days. If you'd rather avoid that, use Copy my answers and email Lori yourself.</p>
+<p><strong>This is private.</strong> Only Lori sees your answers. When you press Send, your answers are emailed to Lori through FormSubmit, a form delivery service. This page doesn't save anything, but FormSubmit handles your answers in transit and keeps a copy for up to 30 days. If you'd rather avoid that, use Copy my answers and send them to Lori directly.</p>
 <p>Fields marked (optional) can be left blank. You can update or withdraw your details anytime by messaging Lori.</p>
 </div>
 <form id="f" autocomplete="off">
@@ -71,9 +71,8 @@ button.alt{background:transparent;color:var(--ink);border:1.5px solid var(--line
 <div id="msg" hidden role="status"></div>
 </main>
 <script>
-var TO="anpanart@gmail.com";
 // FormSubmit alias (random string from FormSubmit's activation email). Must be set before publishing.
-var ALIAS="REPLACE_WITH_FORMSUBMIT_ALIAS";
+var ALIAS="2a7085481ebfbeea4e537fe8a42c8a4a";
 var ENDPOINT="https://formsubmit.co/ajax/"+ALIAS;
 var SUBJECT="MICF 2027 emergency contact";
 function v(id){return document.getElementById(id).value.trim()||"(not answered)";}
@@ -89,25 +88,23 @@ return [["Full name",v("name")],["Role",v("role")],["Mobile",v("mobile")],
 ["Consent","Agreed: keep for the 2027 season, use only in an emergency, delete after the festival."]];
 }
 function text(){return ["MICF 2027: private emergency contact form"].concat(fields().map(function(p){return p[0]+": "+p[1];})).join("\r\n\r\n");}
-function mailtoLink(){return "mailto:"+TO+"?subject="+encodeURIComponent(SUBJECT+": "+v("name"))+"&body="+encodeURIComponent(text());}
 document.getElementById("f").onsubmit=function(e){
 e.preventDefault();
 var b=document.getElementById("send");
 if(document.getElementById("honey").value){msg("Thanks! Your details were sent privately to Lori.");return;}
-if(/^REPLACE_/.test(ALIAS)){msg("This form isn't set up yet. Please use Copy my answers and email them to "+TO+".",true);return;}
 b.disabled=true;b.textContent="Sending…";
 var data={_subject:SUBJECT,form_name:SUBJECT,_template:"table",_captcha:"false",_honey:""};
 fields().forEach(function(p){data[p[0]]=p[1];});
 fetch(ENDPOINT,{method:"POST",headers:{"Content-Type":"application/json","Accept":"application/json"},body:JSON.stringify(data)})
 .then(function(r){return r.json().catch(function(){return {};}).then(function(j){if(!r.ok||String(j.success)==="false")throw new Error("send failed");});})
 .then(function(){b.textContent="Sent";msg("Thanks! Your details were sent privately to Lori.");})
-.catch(function(){b.disabled=false;b.textContent="Send my details to Lori";var m=document.getElementById("msg");msg("Sorry, your details couldn't be sent. Please use Copy my answers and email them to "+TO+".",true);var a=document.createElement("a");a.href=mailtoLink();a.textContent=" Open my email app";m.appendChild(a);});
+.catch(function(){b.disabled=false;b.textContent="Send my details to Lori";msg("Sorry, your details couldn't be sent. Please use Copy my answers and send them to Lori directly.",true);});
 };
 document.getElementById("copy").onclick=function(){
 var t=text();
-try{navigator.clipboard.writeText(t).then(function(){msg("Copied. Paste your answers into an email or message to Lori ("+TO+").");},function(){fallback(t);});}catch(e){fallback(t);}
+try{navigator.clipboard.writeText(t).then(function(){msg("Copied. Paste your answers into a message and send them to Lori directly.");},function(){fallback(t);});}catch(e){fallback(t);}
 };
-function fallback(t){var a=document.createElement("textarea");a.value=t;document.body.appendChild(a);a.select();var ok=false;try{ok=document.execCommand("copy");}catch(e){}document.body.removeChild(a);msg(ok?"Copied. Paste your answers into an email or message to Lori ("+TO+").":"Copying was blocked. Please try Send, or email "+TO+".",!ok);}
+function fallback(t){var a=document.createElement("textarea");a.value=t;document.body.appendChild(a);a.select();var ok=false;try{ok=document.execCommand("copy");}catch(e){}document.body.removeChild(a);msg(ok?"Copied. Paste your answers into a message and send them to Lori directly.":"Copying was blocked. Please try Send, or send your details to Lori directly.",!ok);}
 </script>
 </body>
 </html>
