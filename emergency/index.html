@@ -95,7 +95,7 @@ return [["Full name",v("name")],["Role",v("role")],["Mobile",v("mobile")],
 ["Hair and/or makeup",radio("hmu")],
 ["Film behind-the-scenes videos",radio("bts")],
 ["Emergency contact 1",v("ec1name")+" ("+v("ec1rel")+") "+v("ec1phone")],
-["Emergency contact 2",v("ec2name")+" ("+v("ec2rel")+") "+v("ec2phone")],
+["Emergency contact 2",(function(){var n=document.getElementById("ec2name").value.trim(),r=document.getElementById("ec2rel").value.trim(),t=document.getElementById("ec2phone").value.trim();return (n||r||t)?v("ec2name")+" ("+v("ec2rel")+") "+v("ec2phone"):"(not given)";})()],
 ["Medical, allergies, medications (voluntary)",v("medical")],["Access needs",v("access")],
 ["Consent","Agreed: keep for the 2027 season, use only in an emergency, delete after the festival."]];
 }
