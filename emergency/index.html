@@ -58,11 +58,6 @@ button.alt{background:transparent;color:var(--ink);border:1.5px solid var(--line
 <label class="opt"><input type="radio" name="hmu" value="Yes, my own" required>Yes, my own</label>
 <label class="opt"><input type="radio" name="hmu" value="Yes, for others too">Yes, for others too</label>
 <label class="opt"><input type="radio" name="hmu" value="No">No</label></fieldset>
-<fieldset><legend>Could you film behind-the-scenes videos for marketing?</legend>
-<label class="opt"><input type="radio" name="bts" value="Yes" required>Yes</label>
-<label class="opt"><input type="radio" name="bts" value="Maybe" required>Maybe</label>
-<label class="opt"><input type="radio" name="bts" value="No" required>No</label>
-</fieldset>
 <fieldset><legend>Emergency contact 1</legend>
 <label class="s" for="ec1name">Name</label><input type="text" id="ec1name" autocomplete="off" required>
 <label class="s" for="ec1rel">Relationship to you</label><input type="text" id="ec1rel" autocomplete="off" required>
@@ -93,7 +88,6 @@ return [["Full name",v("name")],["Role",v("role")],["Mobile",v("mobile")],
 ["Birthday",document.getElementById("bday").value+" "+document.getElementById("bmonth").value+(y?" "+y:"")],
 ["Headshot link",document.getElementById("hsbox").hidden?"(not a performer)":v("headshot")],
 ["Hair and/or makeup",radio("hmu")],
-["Film behind-the-scenes videos",radio("bts")],
 ["Emergency contact 1",v("ec1name")+" ("+v("ec1rel")+") "+v("ec1phone")],
 ["Emergency contact 2",(function(){var n=document.getElementById("ec2name").value.trim(),r=document.getElementById("ec2rel").value.trim(),t=document.getElementById("ec2phone").value.trim();return (n||r||t)?v("ec2name")+" ("+v("ec2rel")+") "+v("ec2phone"):"(not given)";})()],
 ["Medical, allergies, medications (voluntary)",v("medical")],["Access needs",v("access")],
